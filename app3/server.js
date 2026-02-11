@@ -66,3 +66,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Hostname: ${os.hostname()}`);
   console.log(`Process ID: ${process.pid}`);
 });
+
+// Export app for testing
+module.exports = app;

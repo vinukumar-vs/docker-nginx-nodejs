@@ -46,3 +46,7 @@ out/
 # Package manager
 package-lock.json
 yarn.lock
+
+
+# Test coverage
+coverage/
