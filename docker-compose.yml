@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # NGINX Reverse Proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - app1
+      - app2
+      - app3
+    networks:
+      - nodejs_network
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/nginx_status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Node.js Application 1
+  app1:
+    build:
+      context: ./app1
+      dockerfile: Dockerfile
+    container_name: nodejs-app1
+    environment:
+      - PORT=3001
+      - APP_NAME=App1
+      - NODE_ENV=production
+    networks:
+      - nodejs_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Node.js Application 2
+  app2:
+    build:
+      context: ./app2
+      dockerfile: Dockerfile
+    container_name: nodejs-app2
+    environment:
+      - PORT=3002
+      - APP_NAME=App2
+      - NODE_ENV=production
+    networks:
+      - nodejs_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Node.js Application 3
+  app3:
+    build:
+      context: ./app3
+      dockerfile: Dockerfile
+    container_name: nodejs-app3
+    environment:
+      - PORT=3003
+      - APP_NAME=App3
+      - NODE_ENV=production
+    networks:
+      - nodejs_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  nodejs_network:
+    driver: bridge
